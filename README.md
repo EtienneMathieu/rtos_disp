@@ -9,5 +9,5 @@ Some piece of code used by me to work with tft display.
 
 Nowtime it is possible to:
  - initialize display
- - drawing rectangles
- - drawing simple functions one y pixel per one x pixel
+ - draw rectangles
+ - draw simple functions one y pixel per one x pixel
