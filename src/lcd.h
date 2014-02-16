@@ -326,7 +326,14 @@ static inline void ili9341_backlight_off(void)
  */
 
 void lcdInit();
- void send(uint8_t);
-void draw(uint8_t[], ili9341_color_t);
+void send(uint8_t);
+//void draw(ili9341_color_t[][]); //drawing the whole screen
+void draw_alt(uint8_t[], ili9341_color_t,uint8_t); //drawing only affected pixels
+												//at this moment draw 1 y pixel per x pixel
+void erase_alt(uint8_t pixels[], uint8_t width); //same as above, but simply erasing
+//erases and draws at the same time
+void erase_draw_alt(uint8_t prev_pixels[], uint8_t pixels[], ili9341_color_t color, uint8_t width);
+void draw_rectangledraw_rectangle(uint8_t xstart, uint8_t ystart, uint8_t xend, uint8_t yend, ili9341_color_t color);
+void black_screen();
 
 #endif /* LCD_H_ */

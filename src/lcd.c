@@ -137,7 +137,7 @@ void lcdInit(){
 	  SPI_InitStructure.SPI_CPOL = SPI_CPOL_Low;
 	  SPI_InitStructure.SPI_CPHA = SPI_CPHA_1Edge;
 	  SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;
-	  SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_16;
+	  SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_2;
 
 	  SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
 //	  SPI_InitStructure.SPI_CRCPolynomial = 7;
@@ -288,21 +288,71 @@ void ili9341_set_bottom_right_limit(ili9341_coord_t x, ili9341_coord_t y)
 //	ili9341_send_draw_limits(1);
 }
 
-void draw(uint8_t pixels[], ili9341_color_t color){
-	ili9341_send_command(ILI9341_CMD_MEMORY_WRITE);
+/*void draw(ili9341_color_t pixels[][]){
+	ili9341_set_limits(0, 0, ILI9341_DEFAULT_WIDTH, ILI9341_DEFAULT_HEIGHT);
 
+	ili9341_send_command(ILI9341_CMD_MEMORY_WRITE);
 	for(uint8_t k = 0; k<ILI9341_DEFAULT_HEIGHT; k++){
 		for(uint16_t i=0; i<ILI9341_DEFAULT_WIDTH; i++){
-			if(pixels[i]==k){
-				ili9341_send_byte(color);
-				ili9341_send_byte(color >> 8);
-			} else{
-				ili9341_send_byte(ILI9341_COLOR(0,0,0));
-				ili9341_send_byte(ILI9341_COLOR(0,0,0) >> 8);
-			}
+			ili9341_send_byte(pixels[i][k]);
+			ili9341_send_byte(pixels[i][k] >> 8);
 		}
+	}
+
+	ili9341_wait_for_send_done();
+
+}*/
+void draw_alt(uint8_t pixels[], ili9341_color_t color,uint8_t width){
+
+	for(uint16_t i=0; i<ILI9341_DEFAULT_WIDTH; i++){
+		ili9341_set_limits(i-width/2, pixels[i]-width/2, i+width/2,
+									pixels[i]+width/2);
+
+
+		ili9341_duplicate_pixel(color, width*width);
+
 
 	}
+}
+void erase_alt(uint8_t pixels[], uint8_t width){
+	for(uint16_t i=0; i<ILI9341_DEFAULT_WIDTH; i++){
+		ili9341_set_limits(i-width/2, pixels[i]-width/2, i+width/2,
+									pixels[i]+width/2);
+
+
+		ili9341_duplicate_pixel(ILI9341_COLOR(0, 0, 0), width*width);
+
+
+	}
+}
+void erase_draw_alt(uint8_t prev_pixels[], uint8_t pixels[], ili9341_color_t color, uint8_t width){
+	for(uint16_t i=0; i<ILI9341_DEFAULT_WIDTH; i++){
+		ili9341_set_limits(i-width/2, prev_pixels[i]-width/2, i+width/2,
+										prev_pixels[i]+width/2);
+
+		ili9341_duplicate_pixel(ILI9341_COLOR(0, 0, 0), width*width);
+
+		ili9341_set_limits(i-width/2, pixels[i]-width/2, i+width/2,
+													pixels[i]+width/2);
+
+		ili9341_duplicate_pixel(color, width*width);
+
+	}
+}
+void draw_rectangle(uint8_t xstart, uint8_t ystart, uint8_t xend, uint8_t yend, ili9341_color_t color){
+	ili9341_set_limits(xstart, ystart, xend, yend);
+
+	uint8_t width = xend-xstart;
+	uint8_t height = yend-ystart;
+	ili9341_duplicate_pixel(ILI9341_COLOR(0, 0, 0), width*height);
+
+}
+
+void black_screen(){
+	ili9341_set_limits(0, 0, ILI9341_DEFAULT_WIDTH,
+								ILI9341_DEFAULT_HEIGHT);
+	ili9341_send_command(ILI9341_CMD_MEMORY_WRITE);
+	ili9341_duplicate_pixel(ILI9341_COLOR(0, 0, 0), ILI9341_DEFAULT_WIDTH*ILI9341_DEFAULT_HEIGHT);
 	ili9341_wait_for_send_done();
 	ili9341_deselect_chip();
 }
